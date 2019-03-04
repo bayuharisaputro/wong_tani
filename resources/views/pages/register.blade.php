@@ -298,25 +298,37 @@ font-size: 16px;
 					<div class="setting"></div>
 					  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
 
-					    <script  src="js/index.js"></script>
 
-					<div class="flex-sb-m w-full p-t-3 p-b-32" id="ingat-saya">
-						<div class="contact100-form-checkbox">
-							<input class="input-checkbox100" id="ckb1" type="checkbox" name="remember-me">
-							<label class="label-checkbox100" for="ckb1">
-								Inggatkan saya
-							</label>
-						</div>
-
-						<div id="lupa-password">
-							<a href="#" class="txt1">
-								Lupa Password?
-							</a>
-						</div>
+					<div class="wrap-input100 validate-input" id="nomor-hp">
+						<input class="input100" type="text" name="no_hp" id="input-hp" onkeyup="nohp()" value="+62">
+						<span class="focus-input100"></span>
+						<span class="label-input100" id="label-hp" >No. HP</span>
 					</div>
 
-					<div class="container-login100-form-btn" id="daftar-btn">
-						<button type="submit" class="login100-form-btn">
+					<div class="container-login100-form-btn" id="btn-kirim" style="display: none">
+						<button type="button" class="login100-form-btn" id="btn-kirim2">
+							Kirim Kode Verifikasi
+						</button>
+					</div>
+					<div style="height: 10px">
+
+					</div>
+					<div class="wrap-input100 validate-input" style="display: none" id="div-input-kode">
+						<input class="input100" type="text" name="" id="input-kode" onkeyup="" value="">
+						<span class="focus-input100"></span>
+						<span class="label-input100" id="label-hp" >Kode Verifikasi</span>
+					</div>
+
+					<div class="container-login100-form-btn">
+						<button type="button" class="login100-form-btn" id="btn-konfirm" onclick="myFunction()" style="display: none">
+							Konfirmasi Kode Verifikasi
+						</button>
+					</div>
+					<div style="height: 10px">
+
+					</div>
+					<div class="container-login100-form-btn" >
+						<button type="submit" class="login100-form-btn" id="daftar-btn" style="pointer-events: none;">
 							Daftar
 						</button>
 					</div>
@@ -363,6 +375,90 @@ font-size: 16px;
 		<script src="login-register/vendor/countdowntime/countdowntime.js"></script>
 	<!--===============================================================================================-->
 		<script src="login-register/js/main.js"></script>
-		
+		<script>
+		var inputhp = document.getElementById('input-hp');
+		var btnkirimkode = document.getElementById('btn-kirim');
+		var divinputkode = document.getElementById('div-input-kode');
+		var inputkode = document.getElementById('input-kode');
+		var btnkonfirmasikode = document.getElementById('btn-konfirm');
+		var btndaftar = document.getElementById('daftar-btn');
+
+		var nohp = function(){
+			if(inputhp.value!=''){
+					btnkirimkode.style.display = '';
+			}else{
+					btnkirimkode.style.display = 'none';
+			}
+		}
+		</script>
+		<script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-app.js"></script>
+		<!-- Add additional services that you want to use -->
+		<script src="https://www.gstatic.com/firebasejs/5.8.5/firebase-auth.js"></script>
+
+		<script src="https://www.gstatic.com/firebasejs/5.8.5/firebase.js"></script>
+		<script>
+		// Initialize Firebase
+		var config = {
+			apiKey: "AIzaSyDfMRU_nHwQD5Zy98408-CilxnsWibeYFI",
+			authDomain: "wongtani-dddaa.firebaseapp.com",
+			databaseURL: "https://wongtani-dddaa.firebaseio.com",
+			projectId: "wongtani-dddaa",
+			storageBucket: "wongtani-dddaa.appspot.com",
+			messagingSenderId: "821988503176"
+		};
+		firebase.initializeApp(config);
+
+		//invisiblerecaptchastart
+		window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('btn-kirim2', {
+      'size': 'invisible',
+      'callback': function(response) {
+				console.log("check 1");
+        // reCAPTCHA solved, allow signInWithPhoneNumber.
+        onSignInSubmit();
+      }
+    });
+		recaptchaVerifier.render().then(function(widgetId) {
+    window.recaptchaWidgetId = widgetId;
+    });
+		//invisiblerecaptchaendddsss
+
+		function onSignInSubmit() {
+			var phoneNumber = inputhp.value;
+			var appVerifier = window.recaptchaVerifier;
+			firebase
+			.auth()
+			.signInWithPhoneNumber(phoneNumber, appVerifier)
+			.then(function (confirmationResult) {
+				// SMS sent. Prompt user to type the code from the message, then sign the
+				// user in with confirmationResult.confirm(code).
+				window.confirmationResult = confirmationResult;
+				btnkirimkode.style.display = 'none';
+				divinputkode.style.display = '';
+				btnkonfirmasikode.style.display = '';
+
+			}).catch(function (error) {
+				// Error; SMS not sent
+				console.error('Error during signInWithPhoneNumber', error);
+				window.alert('Error during signInWithPhoneNumber:\n\n'
+				+ error.code + '\n\n' + error.message);
+			});
+		}
+
+		var myFunction = function() {
+			window.confirmationResult.confirm(document.getElementById("input-kode").value)
+			.then(function(result) {
+				window.alert('Konfirmasi Kode Berhasil');
+				console.log("success");
+				// window.location.href = "/profile/"+inputhp.value+"/edit";
+				btndaftar.style.pointerEvents = '';
+			}, function(error) {
+				window.alert('Terjadi Kesalahan :\n\n'
+				+ error.code + '\n\n' + error.message);
+				console.log(error);
+			});
+		};
+		</script>
+
+
 </body>
 </html>
